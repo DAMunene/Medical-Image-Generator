@@ -6,6 +6,10 @@ from uuid import uuid4
 from PIL import Image
 import io
 from fastapi.staticfiles import StaticFiles
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 app = FastAPI()
 
@@ -13,10 +17,10 @@ app = FastAPI()
 IMAGE_SAVE_FOLDER = "generated_images"
 os.makedirs(IMAGE_SAVE_FOLDER, exist_ok=True)
 
-AZURE_OPENAI_ENDPOINT = "https://auraemodel.cognitiveservices.azure.com/"
-AZURE_OPENAI_KEY = "8G7OQeuO5JSuG1sLALSvyWpNwEk82O7FyyA8gfRoDFTfKH2qBX4MJQQJ99BGACYeBjFXJ3w3AAAAACOGWivX"
-DEPLOYMENT_NAME = "dall-e-3"
-API_VERSION = "2024-02-01"
+AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")
+AZURE_OPENAI_KEY = os.getenv("AZURE_OPENAI_KEY")
+DEPLOYMENT_NAME = os.getenv("DEPLOYMENT_NAME")
+API_VERSION = os.getenv("API_VERSION")
 
 class PromptRequest(BaseModel):
     prompt: str
@@ -50,6 +54,7 @@ def save_image_from_url(image_url: str, folder: str) -> str:
     image.save(filepath)
     return filepath
 
+# Mount static files
 app.mount("/images", StaticFiles(directory=IMAGE_SAVE_FOLDER), name="images")
 
 @app.post("/generate-image/")
