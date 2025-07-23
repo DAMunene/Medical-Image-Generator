@@ -1,8 +1,9 @@
 import streamlit as st
 import requests
+import os
 
-# Set FastAPI backend URL
-BACKEND_URL = "http://127.0.0.1:8000/generate-image/"
+# Set FastAPI backend URL - use environment variable or fallback to Railway deployment
+BACKEND_URL = os.getenv("FASTAPI_BACKEND_URL", "https://wonderful-mindfulness.railway.app/generate-image/")
 
 st.title("Medical Image Generator with Azure DALL·E 3")
 st.write("Enter a medical prompt to generate a labeled training image using Azure DALL·E 3")
@@ -30,3 +31,4 @@ if st.button("Generate Image"):
 
             except requests.exceptions.RequestException as e:
                 st.error(f"API error: {e}")
+                st.info("Make sure your FastAPI backend is running and accessible.")
