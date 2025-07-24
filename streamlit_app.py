@@ -74,7 +74,7 @@ if st.session_state.show_payment and not st.session_state.paystack_ref:
         }
         data = {
             "email": email,
-            "amount": 100 * 100,  # Paystack expects amount in kobo (100 kobo = 1 NGN)
+            "amount": 100,  # 100 cents = $1 for USD
             "currency": "USD",    # Or "NGN" if you want to charge in Naira
             "callback_url": f"{BACKEND_URL}?paystack_ref={{reference}}"
         }
