@@ -12,6 +12,13 @@ import uvicorn
 # Load environment variables
 load_dotenv()
 
+# Debug: Print environment variables (will show in Railway logs)
+print("Environment variables loaded:")
+print(f"AZURE_OPENAI_ENDPOINT: {os.getenv('AZURE_OPENAI_ENDPOINT')}")
+print(f"DEPLOYMENT_NAME: {os.getenv('DEPLOYMENT_NAME')}")
+print(f"API_VERSION: {os.getenv('API_VERSION')}")
+print(f"AZURE_OPENAI_KEY: {'SET' if os.getenv('AZURE_OPENAI_KEY') else 'NOT SET'}")
+
 app = FastAPI(title="Medical Image Generator API", version="1.0.0")
 
 # Configuration
