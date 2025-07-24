@@ -24,6 +24,7 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+.streamlit/secrets.toml
 
 # IDE
 .vscode/
