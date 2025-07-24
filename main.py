@@ -7,11 +7,12 @@ from PIL import Image
 import io
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
+import uvicorn
 
 # Load environment variables
 load_dotenv()
 
-app = FastAPI()
+app = FastAPI(title="Medical Image Generator API", version="1.0.0")
 
 # Configuration
 IMAGE_SAVE_FOLDER = "generated_images"
@@ -57,12 +58,38 @@ def save_image_from_url(image_url: str, folder: str) -> str:
 # Mount static files
 app.mount("/images", StaticFiles(directory=IMAGE_SAVE_FOLDER), name="images")
 
+# Add root endpoint
+@app.get("/")
+async def root():
+    return {
+        "message": "Medical Image Generator API is running",
+        "status": "healthy",
+        "endpoints": {
+            "generate_image": "/generate-image/",
+            "docs": "/docs",
+            "health": "/health"
+        }
+    }
+
+# Add health check endpoint
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "service": "medical-image-generator"}
+
 @app.post("/generate-image/")
 async def generate_image(request: PromptRequest, req: Request):
-    result = call_azure_openai(request.prompt)
-    image_url = result["data"][0]["url"]  # Adjust if the response structure is different
-    filepath = save_image_from_url(image_url, IMAGE_SAVE_FOLDER)
-    filename = os.path.basename(filepath)
-    base_url = str(req.base_url).rstrip("/")
-    image_access_url = f"{base_url}/images/{filename}"
-    return {"image_url": image_access_url} 
+    try:
+        result = call_azure_openai(request.prompt)
+        image_url = result["data"][0]["url"]  # Adjust if the response structure is different
+        filepath = save_image_from_url(image_url, IMAGE_SAVE_FOLDER)
+        filename = os.path.basename(filepath)
+        base_url = str(req.base_url).rstrip("/")
+        image_access_url = f"{base_url}/images/{filename}"
+        return {"image_url": image_access_url, "status": "success"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating image: {str(e)}")
+
+# This is crucial for Railway deployment
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
