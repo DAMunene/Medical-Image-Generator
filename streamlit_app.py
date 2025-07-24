@@ -1,12 +1,13 @@
+# streamlit_app.py
+
 import streamlit as st
-import requests
+from utils import call_azure_openai, save_image_from_url
 import os
 
-# Set FastAPI backend URL - use environment variable or fallback to Railway deployment
-BACKEND_URL = os.getenv("FASTAPI_BACKEND_URL", "https://wonderful-mindfulness.railway.app/generate-image/")
+st.set_page_config(page_title="Medical Image Generator", layout="centered")
 
 st.title("Medical Image Generator with Azure DALL·E 3")
-st.write("Enter a medical prompt to generate a labeled training image using Azure DALL·E 3")
+st.write("Enter a medical prompt to generate a labeled training image.")
 
 # Prompt input
 prompt = st.text_area("Enter your image prompt:", height=150, placeholder="e.g. A simplified anatomical diagram...")
@@ -17,18 +18,11 @@ if st.button("Generate Image"):
     else:
         with st.spinner("Generating image..."):
             try:
-                # Send POST request to FastAPI
-                response = requests.post(BACKEND_URL, json={"prompt": prompt})
-                response.raise_for_status()
-                image_url = response.json().get("image_url")
+                image_url = call_azure_openai(prompt)
+                image_path = save_image_from_url(image_url)
 
-                # Display image
-                if image_url:
-                    st.success("Image generated successfully!")
-                    st.image(image_url, caption="Generated Medical Training Image")
-                else:
-                    st.error("No image URL returned from the API.")
+                st.success("Image generated successfully!")
+                st.image(image_path, caption="Generated Medical Training Image")
 
-            except requests.exceptions.RequestException as e:
-                st.error(f"API error: {e}")
-                st.info("Make sure your FastAPI backend is running and accessible.")
+            except Exception as e:
+                st.error(f"Error generating image: {str(e)}")
