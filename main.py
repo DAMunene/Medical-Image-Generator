@@ -76,6 +76,11 @@ async def root():
 async def health_check():
     return {"status": "healthy", "service": "medical-image-generator"}
 
+# Add a simple test endpoint
+@app.get("/test")
+async def test():
+    return {"message": "FastAPI is working correctly"}
+
 @app.post("/generate-image/")
 async def generate_image(request: PromptRequest, req: Request):
     try:
